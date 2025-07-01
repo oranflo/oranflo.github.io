@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算器</title>
+    <script src="jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/base-min.css">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+</head>
+
+<body>
+    <span>0X08</span><span id="bspan"></span><span>0X00</span>
+    <select name="ending" id="ending">
+        <option value="1">大端序</option>
+        <option value="0">小端序</option>
+    </select>
+    <input type="number" class="o" id="0" value="0" onfocus="cal_oh_to_b('o')" oninput="cal_oh_to_b('o')">
+    <input type="text" class="x" id="0" value="0" onfocus="cal_oh_to_b('x')" oninput="cal_oh_to_b('x')">
+</body>
+<script>
+    $(document).ready(function () {
+        for (i = MAX_ADDR_LEN - 1; i >= 0; i--) {
+            $("#bspan").append('<input type="number" class="b" id="' + i + '" value="0" oninput="callback_b(' + i + ')" onfocus="callback_b(' + i + ')">');
+        }
+
+    });
+    let MAX_ADDR_LEN = 8;
+
+    function callback_b(i) {
+        limit_b(i);
+        cal_b_to_oh();
+    }
+
+    function limit_b(i) {
+        let v = parseInt($("#" + i + ".b").val(), 10);
+        if (v != 0 && v != 1) {
+            $("#" + i + ".b").val("1");
+        }
+    }
+
+    function cal_b_to_oh() {
+        let b = "";
+        if ($("#ending").val() == "1") {
+            for (i = MAX_ADDR_LEN - 1; i >= 0; i--) { b += $("#" + i + ".b").val() }
+        } else {
+            for (i = 0; i < MAX_ADDR_LEN; i++) { b += $("#" + i + ".b").val() }
+        }
+
+        let o = parseInt(b, 2);
+        console.log("十进制:" + o);
+        let x = o.toString(16);
+        console.log("十六进制:" + x);
+        $("#0.o").val(o);
+        $("#0.x").val(x.toUpperCase());
+    }
+
+    function cal_oh_to_b(hook_num) {
+        let o, x, b;
+        if (hook_num == "x") {
+            x = $("#0.x").val();
+            o = parseInt(x, 16);
+        } else if (hook_num == "o") {
+            o = parseInt($("#0.o").val(), 10);
+            x = o.toString(16);
+        }
+        x = x.toUpperCase();
+        b = o.toString(2);
+        console.log("回调" + hook_num);
+        console.log("十进制:" + o);
+        console.log("十六进制:" + x);
+        console.log("二进制:", b);
+        $("#0.o").val(o);
+        $("#0.x").val(x);
+
+        b = b.split("").reverse();
+        let fill_b = b;
+        while (fill_b.length < MAX_ADDR_LEN) {
+            fill_b.push("0");
+        }
+
+        console.log("二进制小端(" + MAX_ADDR_LEN + "b):", fill_b);
+
+        if ($("#ending").val() == "0") {
+            fill_b = fill_b.reverse();
+        }
+
+        for (i = 0; i < MAX_ADDR_LEN; i++) {
+            $("#" + i + ".b").val(fill_b[i]);
+        }
+    }
+</script>
+
+</html>
